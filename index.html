@@ -48,8 +48,17 @@ input[type=text],input[type=date],input[type=number],select{width:100%;padding:8
 .cell .gdate.hol-red{color:#e60000}
 .cell.off{background:#ffeef3}
 .cell.today{outline:3px solid #f59e0b;outline-offset:-3px}
-.cell.both{background:#ffe0e9;outline:3px solid #e60000;outline-offset:-3px}
-.cell.both::after{content:"共同休假";display:block;text-align:center;font-size:11px;font-weight:800;color:#e60000;background:#fff;border:1px solid #e60000;border-radius:6px;padding:1px 0;margin-top:3px}
+.cell.both{background:#d7f3e3}
+.cell.blank{background:#fff;min-height:92px}
+.memo{font-size:10px;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px;line-height:1.3}
+.cell{cursor:pointer}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:50}
+.overlay[hidden]{display:none}
+.modal{background:#fff;border-radius:12px;padding:16px;width:min(92vw,380px)}
+.modal h3{margin:0 0 4px;font-size:17px}
+.modal .sub{font-size:13px;color:var(--muted);margin-bottom:8px}
+.modal textarea{width:100%;min-height:80px;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:14px;font-family:inherit}
+.modal .mrow{display:flex;gap:8px;margin-top:10px}
 .who{font-size:10px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .shift{display:block;text-align:center;font-size:16px;font-weight:800;border-radius:6px;padding:3px 0;margin-top:3px}
 .s-day{background:#0036ff;color:#fff}
@@ -59,7 +68,7 @@ input[type=text],input[type=date],input[type=number],select{width:100%;padding:8
 .b-day{background:#0036ff;color:#fff}
 .b-night{background:#111;color:#fff}
 .b-off{background:#fff;color:#f60000;border:1.5px solid #f60000}
-.b-both{color:#e60000;border:1.5px solid #e60000;background:#ffe4ec}
+.b-both{color:#166534;border-color:#86c9a0;background:#d7f3e3}
 .pat button[data-v="1"]{background:#0036ff;border-color:#0036ff;color:#fff}
 .pat button[data-v="2"]{background:#111;border-color:#111;color:#fff}
 .pat button[data-v="0"]{background:#ffeef3;color:#e60000;border-color:#e60000}
@@ -126,7 +135,7 @@ code{background:#eef2f7;padding:1px 5px;border-radius:5px}
 </div>
 <div class="grid" id="wkRow"></div>
 <div class="grid" id="cal"></div>
-<div class="hint" id="legend">圖例：<span class="badge b-day">白班</span>=日班/早班(1)　<span class="badge b-night">大夜</span>=夜班/晚班(2)　<span class="badge b-off">休假</span>=休假(0)　<span class="badge b-both">共同休假</span>=兩人都休。前後灰字是上月/下月的日子，方便對照。</div>
+<div class="hint" id="legend">圖例：<span class="badge b-day">白班</span>=日班/早班(1)　<span class="badge b-night">大夜</span>=夜班/晚班(2)　<span class="badge b-off">休假</span>=休假(0)　<span class="badge b-both">共同休假</span>=兩人都休（淺綠底）。點日期可寫備註。</div>
 </div>
 <div class="card">
 <h2>用法</h2>
@@ -140,6 +149,14 @@ code{background:#eef2f7;padding:1px 5px;border-radius:5px}
 </div>
 </main>
 <footer>資料只存在你的瀏覽器（localStorage），不傳到網路。換手機請用「匯出CSV」或把字串抄過去即可。</footer>
+<div class="overlay" id="memoOv" hidden>
+<div class="modal">
+<h3 id="memoTitle"></h3>
+<div class="sub" id="memoSub"></div>
+<textarea id="memoTxt" placeholder="寫備註…（例：約會、回診、繳費）"></textarea>
+<div class="mrow"><button class="btn btn-p" id="memoSave">儲存</button><button class="btn btn-s" id="memoDel">刪除</button><button class="btn btn-s" id="memoClose">關閉</button></div>
+</div>
+</div>
 <script>
 (function(){
 "use strict";
@@ -171,6 +188,10 @@ name2:"老婆（常日班）",preset2:"weekday",len2:7,anchor2:"2026-01-05",pat2
 enableP2:true,mode:"both",y:2027,m:1};
 try{var raw=localStorage.getItem("shiftAppV2");if(raw){var o=JSON.parse(raw);for(var k in o)S[k]=o[k];}}catch(e){}
 function save(){try{localStorage.setItem("shiftAppV2",JSON.stringify(S));}catch(e){}}
+var MEMOS={};
+try{var mr=localStorage.getItem("shiftMemosV1");if(mr)MEMOS=JSON.parse(mr)||{};}catch(e){MEMOS={};}
+function saveMemos(){try{localStorage.setItem("shiftMemosV1",JSON.stringify(MEMOS));}catch(e){}}
+function memoKey(dt){return dt.getFullYear()+"-"+(dt.getMonth()+1)+"-"+dt.getDate();}
 function fillPresets(sel,cur){sel.innerHTML="";PRESETS.forEach(function(p){var o=document.createElement("option");o.value=p.v;o.textContent=p.t;sel.appendChild(o);});sel.value=cur;}
 function syncInputs(){
 $("name1").value=S.name1;$("preset1").value=S.preset1;$("len1").value=S.len1;$("anchor1").value=S.anchor1;$("str1").value=S.pat1;
@@ -203,11 +224,11 @@ var show2=S.enableP2&&(S.mode==="both");
 var today=new Date();var tstr=fmtD(today);
 var first=new Date(y,m-1,1),startDay=first.getDay(),days=new Date(y,m,0).getDate();
 function fullCell(dt,otherMonth){
+var cell=document.createElement("div");cell.className="cell";
+if(otherMonth){cell.classList.add("blank");return cell;}
 var ds=fmtD(dt);
 var v1=shiftOn(dt,p1),v2=shiftOn(dt,p2);
 var hn=holName(dt);
-var cell=document.createElement("div");cell.className="cell";
-if(otherMonth)cell.style.opacity="0.45";
 if(ds===tstr)cell.classList.add("today");
 var html='<div class="top"><span class="hol">'+hn+'</span><span class="gdate'+(hn?' hol-red':'')+'">'+dt.getDate()+'</span></div>';
 if(!show2){
@@ -221,7 +242,23 @@ else if(v1==="0"||v2==="0")cell.classList.add("off");
 html+='<div class="who">'+escapeHtml(S.name1)+'</div>'+shiftPill(v1);
 html+='<div class="who">'+escapeHtml(S.name2)+'</div>'+shiftPill(v2);
 }
-cell.innerHTML=html;return cell;
+var mk=memoKey(dt);
+if(MEMOS[mk])html+='<div class="memo">📝 '+escapeHtml(MEMOS[mk])+'</div>';
+cell.innerHTML=html;
+(function(dd){cell.onclick=function(){openMemo(dd);};})(new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()));
+return cell;
+}
+var memoDt=null;
+function openMemo(dt){
+memoDt=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate());
+var v1=shiftOn(memoDt,pObj(1)),v2=shiftOn(memoDt,pObj(2));
+var hn=holName(memoDt);
+$("memoTitle").textContent=fmtD(memoDt)+"（"+wkCN(memoDt)+"）"+(hn?"・"+hn:"");
+var sub=S.enableP2?(escapeHtml(S.name1)+"："+badge(v1)+" "+lab(v1)+"　"+escapeHtml(S.name2)+"："+badge(v2)+" "+lab(v2)):("");
+$("memoSub").innerHTML=sub;
+$("memoTxt").value=MEMOS[memoKey(memoDt)]||"";
+$("memoOv").hidden=false;
+setTimeout(function(){$("memoTxt").focus();},50);
 }
 for(var i=startDay-1;i>=0;i--){cal.appendChild(fullCell(new Date(y,m-1,-i),true));}
 for(var d=1;d<=days;d++){cal.appendChild(fullCell(new Date(y,m-1,d),false));}
@@ -263,7 +300,11 @@ $("ymPick").addEventListener("change",function(){var p=$("ymPick").value.split("
 $("qbtn").onclick=queryOne;$("findBtn").onclick=findBoth;
 $("saveBtn").onclick=function(){readInputs();syncInputs();save();renderCal();alert("已儲存到這台裝置");};
 $("resetBtn").onclick=function(){S.name1="我（D組）";S.preset1="corningD";S.len1=28;S.anchor1="2026-01-01";S.pat1=BASE.D;S.name2="老婆（常日班）";S.preset2="weekday";S.len2=7;S.anchor2="2026-01-05";S.pat2="1111100";S.enableP2=true;S.mode="both";fillPresets($("preset1"),S.preset1);fillPresets($("preset2"),S.preset2);syncInputs();save();renderCal();};
-$("exportBtn").onclick=function(){if(!lastBoth.length){alert("先按找共同休假");return;}var csv="日期,星期,"+S.name1+","+S.name2+"\n"+lastBoth.map(function(dt){return fmtD(dt)+","+wkCN(dt)+",休,休";}).join("\n");var b=new Blob(["\ufeff"+csv],{type:"text/csv"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="共同休假.csv";a.click();};
+$("exportBtn").onclick=function(){if(!lastBoth.length){alert("先按找共同休假");return;}var csv="日期,星期,"+S.name1+","+S.name2+",備註\n"+lastBoth.map(function(dt){var mk=memoKey(dt);var memo=(MEMOS[mk]||"").replace(/"/g,'""');return fmtD(dt)+","+wkCN(dt)+",休假,休假,\""+memo+"\"";}).join("\n");var b=new Blob(["\ufeff"+csv],{type:"text/csv"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="共同休假.csv";a.click();};
+$("memoSave").onclick=function(){if(!memoDt)return;var v=$("memoTxt").value.trim();var k=memoKey(memoDt);if(v)MEMOS[k]=v;else delete MEMOS[k];saveMemos();$("memoOv").hidden=true;renderCal();};
+$("memoDel").onclick=function(){if(!memoDt)return;delete MEMOS[memoKey(memoDt)];saveMemos();$("memoOv").hidden=true;renderCal();};
+$("memoClose").onclick=function(){$("memoOv").hidden=true;};
+$("memoOv").addEventListener("click",function(e){if(e.target===$("memoOv"))$("memoOv").hidden=true;});
 if(!$("fromDate").value)$("fromDate").value="2027-01-01";
 if(!$("qdate").value)$("qdate").value="2027-01-01";
 renderCal();
