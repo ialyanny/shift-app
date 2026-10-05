@@ -35,18 +35,34 @@ input[type=text],input[type=date],input[type=number],select{width:100%;padding:8
 .btn-p{background:#111827;color:#fff}.btn-s{background:#eef2ff;color:#1e3a8a;border:1px solid #c7d2fe}
 .btn-g{background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
 .cal-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-.cal-head strong{font-size:18px}
-.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.wk{font-size:12px;color:var(--muted);text-align:center;padding:4px 0}
-.cell{background:#fff;border:1px solid var(--line);border-radius:10px;min-height:74px;padding:6px;position:relative}
-.cell .d{font-size:13px;color:var(--muted)}.cell.today{outline:2px solid #111827}
-.cell.both{background:var(--bothbg);border:2px solid var(--both)}
-.cell.both::after{content:"共同休假";position:absolute;bottom:5px;left:6px;right:6px;text-align:center;font-size:11px;font-weight:800;color:var(--both);background:#fee2e2;border-radius:6px;padding:1px 0}
-.badge{display:inline-block;font-size:12px;font-weight:800;border-radius:7px;padding:2px 6px;margin:2px 2px 0 0;border:1px solid}
-.b-day{color:var(--day);border-color:var(--day);background:#eff6ff}
-.b-night{color:var(--night);border-color:var(--night);background:#f5f3ff}
-.b-off{color:#475569;border-color:#cbd5e1;background:#f8fafc}
-.b-both{color:var(--both);border-color:var(--both);background:#fee2e2}
+.cal-head strong{font-size:26px;letter-spacing:1px;border-bottom:3px solid #333;padding-bottom:2px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+#wkRow{background:#111;border:2px solid #111;border-bottom:0}
+.wk{font-size:15px;font-weight:800;color:#fff;text-align:center;padding:7px 0;background:#111}
+.wk.sun{color:#ff9aa5}
+#cal{background:#111;border:2px solid #111;padding:2px}
+.cell{background:#fff;border:0;border-radius:0;min-height:92px;padding:3px 4px 5px;position:relative}
+.cell .top{display:flex;justify-content:space-between;align-items:flex-start;line-height:1.1}
+.cell .hol{font-size:10px;color:#e60000;max-width:60%;text-align:left}
+.cell .gdate{font-size:22px;font-weight:800;color:#222}
+.cell .gdate.hol-red{color:#e60000}
+.cell.off{background:#ffeef3}
+.cell.today{outline:3px solid #f59e0b;outline-offset:-3px}
+.cell.both{background:#ffe0e9;outline:3px solid #e60000;outline-offset:-3px}
+.cell.both::after{content:"共同休假";display:block;text-align:center;font-size:11px;font-weight:800;color:#e60000;background:#fff;border:1px solid #e60000;border-radius:6px;padding:1px 0;margin-top:3px}
+.who{font-size:10px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shift{display:block;text-align:center;font-size:16px;font-weight:800;border-radius:6px;padding:3px 0;margin-top:3px}
+.s-day{background:#0036ff;color:#fff}
+.s-night{background:#111;color:#fff}
+.s-off{background:#fff;color:#f60000;border:1.5px solid #f60000}
+.badge{display:inline-block;font-size:12px;font-weight:800;border-radius:6px;padding:2px 8px;margin:2px 2px 0 0}
+.b-day{background:#0036ff;color:#fff}
+.b-night{background:#111;color:#fff}
+.b-off{background:#fff;color:#f60000;border:1.5px solid #f60000}
+.b-both{color:#e60000;border:1.5px solid #e60000;background:#ffe4ec}
+.pat button[data-v="1"]{background:#0036ff;border-color:#0036ff;color:#fff}
+.pat button[data-v="2"]{background:#111;border-color:#111;color:#fff}
+.pat button[data-v="0"]{background:#ffeef3;color:#e60000;border-color:#e60000}
 .list{max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:9px;padding:8px;background:#fff}
 .list div{padding:6px 4px;border-bottom:1px dashed var(--line);font-size:14px}
 .switch{display:flex;gap:8px;align-items:center;font-size:14px}
@@ -70,10 +86,10 @@ code{background:#eef2f7;padding:1px 5px;border-radius:5px}
 <select id="preset1"></select>
 <div class="row"><div><label>循環天數</label><input type="number" id="len1" min="1" max="60" value="28"></div>
 <div><label>第1天是幾號</label><input type="date" id="anchor1" value="2026-01-01"></div></div>
-<label>班表（按格子會 休→日→夜 循環切換，也可直接貼字串）</label>
+<label>班表（按格子會 休→白→夜 循環切換，也可直接貼字串）</label>
 <div class="pat" id="pat1"></div>
 <input type="text" id="str1" placeholder="例：0111001100022002220022000110（0休1日2夜）" style="margin-top:6px">
-<div class="hint">0=休，1=日班/早班，2=夜班/晚班。康寧範本已內建A/B/C/D 28天。</div>
+<div class="hint">0=休假，1=白班（日班/早班），2=大夜（夜班/晚班）。康寧範本已內建A/B/C/D 28天。</div>
 <h3>人員二</h3>
 <label>名稱</label><input type="text" id="name2" value="老婆（常日班）">
 <label>套用範本</label><select id="preset2"></select>
@@ -110,13 +126,13 @@ code{background:#eef2f7;padding:1px 5px;border-radius:5px}
 </div>
 <div class="grid" id="wkRow"></div>
 <div class="grid" id="cal"></div>
-<div class="hint" id="legend">圖例：<span class="badge b-day">日</span>=日班/早班(1)　<span class="badge b-night">夜</span>=夜班/晚班(2)　<span class="badge b-off">休</span>=休假(0)　<span class="badge b-both">共同休假</span>=兩人都休。點上月/下月或選月份可查未來。</div>
+<div class="hint" id="legend">圖例：<span class="badge b-day">白班</span>=日班/早班(1)　<span class="badge b-night">大夜</span>=夜班/晚班(2)　<span class="badge b-off">休假</span>=休假(0)　<span class="badge b-both">共同休假</span>=兩人都休。前後灰字是上月/下月的日子，方便對照。</div>
 </div>
 <div class="card">
 <h2>用法</h2>
 <div class="hint">
-1. 先在左邊設好兩個人各自的循環（天數+第1天日期+每一天是休/日/夜）。康寧直接選 A/B/C/D 範本。<br>
-2. 要自己建規則：改循環天數，格子點到你要的 休/日/夜，或直接貼 <code>0/1/2</code> 字串（例 <code>1100</code> 就是做2休2）。<br>
+1. 先在左邊設好兩個人各自的循環（天數+第1天日期+每一天是休/白/夜）。康寧直接選 A/B/C/D 範本。<br>
+2. 要自己建規則：改循環天數，格子點到你要的 休/白/夜，或直接貼 <code>0/1/2</code> 字串（例 <code>1100</code> 就是做2休2）。<br>
 3. 月曆可左右翻月、跳月份，查到後面任何一年。<br>
 4. 「找共同休假」會從指定日期往後掃描，列出兩人都休的日子，方便排約會/出遊，匯出CSV可傳給對方。
 </div>
@@ -145,8 +161,11 @@ function fmtD(dt){var m=("0"+(dt.getMonth()+1)).slice(-2),d=("0"+dt.getDate()).s
 function wkCN(dt){return ["日","一","二","三","四","五","六"][dt.getDay()];}
 function dayDiff(a,b){return Math.round((new Date(a.getFullYear(),a.getMonth(),a.getDate())-new Date(b.getFullYear(),b.getMonth(),b.getDate()))/86400000);}
 function shiftOn(dt,ps){var a=parseD(ps.anchor);var n=ps.len;if(!n||n<1)return "0";var k=((dayDiff(dt,a)%n)+n)%n;return ps.pat[k]||"0";}
-function lab(v){return v==="1"?"日":(v==="2"?"夜":"休");}
-function badge(v){return v==="1"?'<span class="badge b-day">日</span>':(v==="2"?'<span class="badge b-night">夜</span>':'<span class="badge b-off">休</span>');}
+function lab(v){return v==="1"?"白班":(v==="2"?"大夜":"休假");}
+function badge(v){return v==="1"?'<span class="badge b-day">白班</span>':(v==="2"?'<span class="badge b-night">大夜</span>':'<span class="badge b-off">休假</span>');}
+function shiftPill(v){return v==="1"?'<span class="shift s-day">白班</span>':(v==="2"?'<span class="shift s-night">大夜</span>':'<span class="shift s-off">休假</span>');}
+var HOL={"2026-1-1":"元旦","2026-2-15":"小年夜","2026-2-16":"除夕","2026-2-17":"春節","2026-2-18":"春節","2026-2-19":"春節","2026-2-20":"補假","2026-2-27":"補假","2026-2-28":"和平紀念日","2026-4-3":"補假","2026-4-4":"兒童節","2026-4-5":"清明節","2026-4-6":"補假","2026-5-1":"勞動節","2026-6-19":"端午節","2026-9-25":"中秋節","2026-9-28":"教師節","2026-10-9":"補假","2026-10-10":"國慶日","2026-10-25":"光復節","2026-10-26":"補假","2026-12-25":"行憲紀念日","2027-1-1":"元旦","2027-2-4":"小年夜","2027-2-5":"除夕","2027-2-6":"春節","2027-2-7":"春節","2027-2-8":"春節","2027-2-9":"補假","2027-2-10":"補假","2027-2-28":"和平紀念日","2027-3-1":"補假","2027-4-4":"兒童節","2027-4-5":"清明節","2027-4-6":"補假","2027-4-30":"補假","2027-5-1":"勞動節","2027-6-9":"端午節","2027-9-15":"中秋節","2027-9-28":"教師節","2027-10-10":"國慶日","2027-10-11":"補假","2027-10-25":"光復節","2027-12-24":"補假","2027-12-25":"行憲紀念日","2027-12-31":"補假"};
+function holName(dt){return HOL[dt.getFullYear()+"-"+(dt.getMonth()+1)+"-"+dt.getDate()]||"";}
 var S={name1:"我（D組）",preset1:"corningD",len1:28,anchor1:"2026-01-01",pat1:BASE.D,
 name2:"老婆（常日班）",preset2:"weekday",len2:7,anchor2:"2026-01-05",pat2:"1111100",
 enableP2:true,mode:"both",y:2027,m:1};
@@ -162,7 +181,7 @@ renderPat(1);renderPat(2);
 function renderPat(n){
 var box=$("pat"+n),len=S["len"+n],pat=S["pat"+n]||"";
 box.innerHTML="";
-for(var i=0;i<len&&i<60;i++){var v=pat[i]||"0";(function(idx,val){var b=document.createElement("button");b.textContent=val==="1"?"日":(val==="2"?"夜":"休");b.setAttribute("data-v",val);b.title="第"+(idx+1)+"天";b.onclick=function(){var cur=S["pat"+n].split("");cur[idx]=cur[idx]==="0"?"1":(cur[idx]==="1"?"2":"0");S["pat"+n]=cur.join("");$("str"+n).value=S["pat"+n];S["preset"+n]="custom";$("preset"+n).value="custom";save();renderCal();renderPat(n);};box.appendChild(b);})(i,v);}
+for(var i=0;i<len&&i<60;i++){var v=pat[i]||"0";(function(idx,val){var b=document.createElement("button");b.textContent=val==="1"?"白":(val==="2"?"夜":"休");b.setAttribute("data-v",val);b.title="第"+(idx+1)+"天";b.onclick=function(){var cur=S["pat"+n].split("");cur[idx]=cur[idx]==="0"?"1":(cur[idx]==="1"?"2":"0");S["pat"+n]=cur.join("");$("str"+n).value=S["pat"+n];S["preset"+n]="custom";$("preset"+n).value="custom";save();renderCal();renderPat(n);};box.appendChild(b);})(i,v);}
 }
 function readInputs(){
 S.name1=$("name1").value||"人員一";S.len1=Math.max(1,Math.min(60,parseInt($("len1").value||"1",10)));S.anchor1=$("anchor1").value||"2026-01-01";
@@ -175,32 +194,39 @@ function pObj(n){return n===1?{name:S.name1,len:S.len1,anchor:S.anchor1,pat:S.pa
 function renderCal(){
 readInputs();
 var y=S.y,m=S.m;
-$("ymTitle").textContent=y+"年"+m+"月";
+$("ymTitle").textContent=y+"年"+m+"月▾";
 $("ymPick").value=y+"-"+("0"+m).slice(-2);
-var wk=$("wkRow");wk.innerHTML="";["日","一","二","三","四","五","六"].forEach(function(w){var d=document.createElement("div");d.className="wk";d.textContent=w;wk.appendChild(d);});
+var wk=$("wkRow");wk.innerHTML="";["日","一","二","三","四","五","六"].forEach(function(w,i){var d=document.createElement("div");d.className="wk"+((i===0||i===6)?" sun":"");d.textContent=w;wk.appendChild(d);});
 var cal=$("cal");cal.innerHTML="";
-var first=new Date(y,m-1,1),startDay=first.getDay(),days=new Date(y,m,0).getDate();
-for(var i=0;i<startDay;i++){var e=document.createElement("div");e.className="cell";e.style.visibility="hidden";cal.appendChild(e);}
-var today=new Date();var tstr=fmtD(today);
 var p1=pObj(1),p2=pObj(2);
 var show2=S.enableP2&&(S.mode==="both");
-for(var d=1;d<=days;d++){
-var dt=new Date(y,m-1,d),ds=fmtD(dt);
+var today=new Date();var tstr=fmtD(today);
+var first=new Date(y,m-1,1),startDay=first.getDay(),days=new Date(y,m,0).getDate();
+function fullCell(dt,otherMonth){
+var ds=fmtD(dt);
 var v1=shiftOn(dt,p1),v2=shiftOn(dt,p2);
+var hn=holName(dt);
 var cell=document.createElement("div");cell.className="cell";
+if(otherMonth)cell.style.opacity="0.45";
 if(ds===tstr)cell.classList.add("today");
-var html='<div class="d">'+d+'（'+wkCN(dt)+'）</div>';
+var html='<div class="top"><span class="hol">'+hn+'</span><span class="gdate'+(hn?' hol-red':'')+'">'+dt.getDate()+'</span></div>';
 if(!show2){
-var who=S.mode==="p2"?p2:p1;var v=S.mode==="p2"?v2:v1;var nm=S.mode==="p2"?S.name2:S.name1;
-html+='<div style="font-size:12px">'+nm+'</div><div>'+badge(v)+" "+lab(v)+'</div>';
+var v=S.mode==="p2"?v2:v1;
+if(v==="0")cell.classList.add("off");
+html+=shiftPill(v);
 }else{
 var both=(v1==="0"&&v2==="0");
 if(both)cell.classList.add("both");
-html+='<div style="font-size:11px">'+escapeHtml(S.name1)+badge(v1)+'</div>';
-html+='<div style="font-size:11px">'+escapeHtml(S.name2)+badge(v2)+'</div>';
+else if(v1==="0"||v2==="0")cell.classList.add("off");
+html+='<div class="who">'+escapeHtml(S.name1)+'</div>'+shiftPill(v1);
+html+='<div class="who">'+escapeHtml(S.name2)+'</div>'+shiftPill(v2);
 }
-cell.innerHTML=html;cal.appendChild(cell);
+cell.innerHTML=html;return cell;
 }
+for(var i=startDay-1;i>=0;i--){cal.appendChild(fullCell(new Date(y,m-1,-i),true));}
+for(var d=1;d<=days;d++){cal.appendChild(fullCell(new Date(y,m-1,d),false));}
+var tail=(7-((startDay+days)%7))%7;
+for(var t=1;t<=tail;t++){cal.appendChild(fullCell(new Date(y,m-1,days+t),true));}
 }
 function escapeHtml(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 var lastBoth=[];
@@ -215,7 +241,7 @@ for(var i=0;i<n;i++){var dt=new Date(from.getFullYear(),from.getMonth(),from.get
 var box=$("bothList");box.innerHTML="";
 if(!lastBoth.length){box.innerHTML="<div>這段期間沒有共同休假，試著拉長天數。</div>";return;}
 var h=document.createElement("div");h.innerHTML="<b>找到 "+lastBoth.length+" 天共同休假：</b>";box.appendChild(h);
-lastBoth.forEach(function(dt){var d=document.createElement("div");d.textContent=fmtD(dt)+"（"+wkCN(dt)+"） "+S.name1+"休・"+S.name2+"休";box.appendChild(d);});
+lastBoth.forEach(function(dt){var d=document.createElement("div");d.textContent=fmtD(dt)+"（"+wkCN(dt)+"） "+S.name1+"休假・"+S.name2+"休假";box.appendChild(d);});
 }
 function queryOne(){
 readInputs();
