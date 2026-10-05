@@ -1,0 +1,15 @@
+{
+  "name": "輪班對照神器｜單人班表・雙人共同休假查詢",
+  "short_name": "輪班對照",
+  "description": "單人班表、兩人對照、找共同休假，可查未來任何一天。免註冊，設定存在本機。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6fb",
+  "theme_color": "#fecaca",
+  "lang": "zh-Hant",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

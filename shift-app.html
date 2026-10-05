@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#fecaca">
+<meta name="description" content="單人班表、兩人對照、找共同休假，可查未來任何一天。免註冊，設定存在本機。">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="輪班對照">
+<title>輪班對照神器｜單人班表・雙人共同休假查詢</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--line:#dbe3f0;--txt:#1f2a3d;--muted:#6b7a90;--day:#2563eb;--night:#7c3aed;--off:#94a3b8;--both:#dc2626;--bothbg:#fef2f2;--gold:#f59e0b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:"Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif}
+header{background:linear-gradient(90deg,#fecaca,#bfdbfe);padding:14px 18px;border-bottom:1px solid var(--line)}
+header h1{margin:0;font-size:20px}header p{margin:4px 0 0;font-size:13px;color:#43536b}
+main{max-width:1080px;margin:0 auto;padding:14px;display:grid;grid-template-columns:360px 1fr;gap:14px}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px}
+.card h2{margin:0 0 8px;font-size:16px}.card h3{margin:10px 0 6px;font-size:14px}
+label{font-size:13px;color:var(--muted);display:block;margin:8px 0 4px}
+input[type=text],input[type=date],input[type=number],select{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:#fff;color:var(--txt)}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.pat{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.pat button{width:40px;height:40px;border-radius:9px;border:1.5px solid var(--line);font-size:15px;font-weight:700;cursor:pointer;background:#f8fafc}
+.pat button[data-v="1"]{background:#dbeafe;border-color:var(--day);color:var(--day)}
+.pat button[data-v="2"]{background:#ede9fe;border-color:var(--night);color:var(--night)}
+.pat button[data-v="0"]{background:#f1f5f9;color:var(--off)}
+.hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.6}
+.btn{display:inline-block;border:0;border-radius:9px;padding:9px 12px;font-size:14px;font-weight:700;cursor:pointer}
+.btn-p{background:#111827;color:#fff}.btn-s{background:#eef2ff;color:#1e3a8a;border:1px solid #c7d2fe}
+.btn-g{background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+.cal-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.cal-head strong{font-size:18px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.wk{font-size:12px;color:var(--muted);text-align:center;padding:4px 0}
+.cell{background:#fff;border:1px solid var(--line);border-radius:10px;min-height:74px;padding:6px;position:relative}
+.cell .d{font-size:13px;color:var(--muted)}.cell.today{outline:2px solid #111827}
+.cell.both{background:var(--bothbg);border:2px solid var(--both)}
+.cell.both::after{content:"共同休假";position:absolute;bottom:5px;left:6px;right:6px;text-align:center;font-size:11px;font-weight:800;color:var(--both);background:#fee2e2;border-radius:6px;padding:1px 0}
+.badge{display:inline-block;font-size:12px;font-weight:800;border-radius:7px;padding:2px 6px;margin:2px 2px 0 0;border:1px solid}
+.b-day{color:var(--day);border-color:var(--day);background:#eff6ff}
+.b-night{color:var(--night);border-color:var(--night);background:#f5f3ff}
+.b-off{color:#475569;border-color:#cbd5e1;background:#f8fafc}
+.b-both{color:var(--both);border-color:var(--both);background:#fee2e2}
+.list{max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:9px;padding:8px;background:#fff}
+.list div{padding:6px 4px;border-bottom:1px dashed var(--line);font-size:14px}
+.switch{display:flex;gap:8px;align-items:center;font-size:14px}
+footer{max-width:1080px;margin:0 auto;padding:0 14px 30px;color:var(--muted);font-size:12px;line-height:1.7}
+code{background:#eef2f7;padding:1px 5px;border-radius:5px}
+</style>
+</head>
+<body>
+<header>
+<h1>輪班對照神器 <button class="btn btn-s" id="installBtn" style="display:none;margin-left:8px">📲 安裝App</button></h1>
+<p>單人班表・兩個人一起顯示・自動找共同休假・查未來任何一天。免安裝也能用，也可加到主畫面離線開。設定存在這台裝置，可給任何人用。</p>
+</header>
+<main>
+<div>
+<div class="card">
+<h2>① 人員與輪班規則</h2>
+<div class="switch"><input type="checkbox" id="enableP2" checked style="width:auto"><label for="enableP2" style="margin:0;color:var(--txt)">開啟第二個人（跟女友/老婆對照）</label></div>
+<h3>人員一</h3>
+<label>名稱</label><input type="text" id="name1" value="我（D組）">
+<label>套用範本</label>
+<select id="preset1"></select>
+<div class="row"><div><label>循環天數</label><input type="number" id="len1" min="1" max="60" value="28"></div>
+<div><label>第1天是幾號</label><input type="date" id="anchor1" value="2026-01-01"></div></div>
+<label>班表（按格子會 休→日→夜 循環切換，也可直接貼字串）</label>
+<div class="pat" id="pat1"></div>
+<input type="text" id="str1" placeholder="例：0111001100022002220022000110（0休1日2夜）" style="margin-top:6px">
+<div class="hint">0=休，1=日班/早班，2=夜班/晚班。康寧範本已內建A/B/C/D 28天。</div>
+<h3>人員二</h3>
+<label>名稱</label><input type="text" id="name2" value="老婆（常日班）">
+<label>套用範本</label><select id="preset2"></select>
+<div class="row"><div><label>循環天數</label><input type="number" id="len2" min="1" max="60" value="7"></div>
+<div><label>第1天是幾號</label><input type="date" id="anchor2" value="2026-01-05"></div></div>
+<div class="pat" id="pat2"></div>
+<input type="text" id="str2" placeholder="例：1000220022200220001100111001" style="margin-top:6px">
+<div style="margin-top:10px" class="row">
+<button class="btn btn-s" id="saveBtn">💾 儲存到裝置</button>
+<button class="btn btn-s" id="resetBtn">↩ 恢復康寧預設</button>
+</div>
+</div>
+<div class="card">
+<h2>② 查詢</h2>
+<label>顯示模式</label>
+<select id="mode"><option value="both">兩個人一起顯示</option><option value="p1">只看人員一</option><option value="p2">只看人員二</option></select>
+<label>查某一天（兩人各上什麼班？是不是共同休假？）</label>
+<div class="row"><input type="date" id="qdate" value="2027-01-01"><button class="btn btn-p" id="qbtn">查</button></div>
+<div id="qres" class="hint"></div>
+<label>找共同休假（從某天起往後找）</label>
+<div class="row"><input type="date" id="fromDate" value="2027-01-01"><input type="number" id="rangeDays" value="90" min="7" max="365" title="往後幾天"></div>
+<div style="margin-top:8px" class="row"><button class="btn btn-g" id="findBtn">🔍 找共同休假</button><button class="btn btn-s" id="exportBtn">⬇ 匯出CSV</button></div>
+<div id="bothList" class="list" style="margin-top:8px"><div>按「找共同休假」會列出兩人都休的日子。</div></div>
+</div>
+</div>
+<div>
+<div class="card">
+<div class="cal-head">
+<button class="btn btn-s" id="prevM">‹ 上月</button>
+<strong id="ymTitle"></strong>
+<button class="btn btn-s" id="nextM">下月 ›</button>
+<button class="btn btn-s" id="todayBtn">今天</button>
+<input type="month" id="ymPick" style="max-width:170px">
+</div>
+<div class="grid" id="wkRow"></div>
+<div class="grid" id="cal"></div>
+<div class="hint" id="legend">圖例：<span class="badge b-day">日</span>=日班/早班(1)　<span class="badge b-night">夜</span>=夜班/晚班(2)　<span class="badge b-off">休</span>=休假(0)　<span class="badge b-both">共同休假</span>=兩人都休。點上月/下月或選月份可查未來。</div>
+</div>
+<div class="card">
+<h2>用法</h2>
+<div class="hint">
+1. 先在左邊設好兩個人各自的循環（天數+第1天日期+每一天是休/日/夜）。康寧直接選 A/B/C/D 範本。<br>
+2. 要自己建規則：改循環天數，格子點到你要的 休/日/夜，或直接貼 <code>0/1/2</code> 字串（例 <code>1100</code> 就是做2休2）。<br>
+3. 月曆可左右翻月、跳月份，查到後面任何一年。<br>
+4. 「找共同休假」會從指定日期往後掃描，列出兩人都休的日子，方便排約會/出遊，匯出CSV可傳給對方。
+</div>
+</div>
+</div>
+</main>
+<footer>資料只存在你的瀏覽器（localStorage），不傳到網路。換手機請用「匯出CSV」或把字串抄過去即可。</footer>
+<script>
+(function(){
+"use strict";
+var BASE={A:"1000220022200220001100111001",B:"2000110011100110002200222002",C:"0222002200011001110011000220",D:"0111001100022002220022000110"};
+var PRESETS=[
+{v:"corningD",t:"康寧 D組（28天）",len:28,anchor:"2026-01-01",pat:BASE.D},
+{v:"corningA",t:"康寧 A組（28天）",len:28,anchor:"2026-01-01",pat:BASE.A},
+{v:"corningB",t:"康寧 B組（28天）",len:28,anchor:"2026-01-01",pat:BASE.B},
+{v:"corningC",t:"康寧 C組（28天）",len:28,anchor:"2026-01-01",pat:BASE.C},
+{v:"d2o2",t:"日班做2休2（4天：日日休休）",len:4,anchor:"2026-01-01",pat:"1100"},
+{v:"dn2o2",t:"日夜輪做2休2（8天）",len:8,anchor:"2026-01-01",pat:"11002200"},
+{v:"weekday",t:"常日班週休二日（7天）",len:7,anchor:"2026-01-05",pat:"1111100"},
+{v:"custom",t:"自訂…",len:0,anchor:"",pat:""}
+];
+function $(id){return document.getElementById(id);}
+function opp(s){return s.split("").map(function(c){return c==="0"?"0":(c==="1"?"2":"1");}).join("");}
+function parseD(s){var p=s.split("-");return new Date(p[0],p[1]-1,p[2]);}
+function fmtD(dt){var m=("0"+(dt.getMonth()+1)).slice(-2),d=("0"+dt.getDate()).slice(-2);return dt.getFullYear()+"-"+m+"-"+d;}
+function wkCN(dt){return ["日","一","二","三","四","五","六"][dt.getDay()];}
+function dayDiff(a,b){return Math.round((new Date(a.getFullYear(),a.getMonth(),a.getDate())-new Date(b.getFullYear(),b.getMonth(),b.getDate()))/86400000);}
+function shiftOn(dt,ps){var a=parseD(ps.anchor);var n=ps.len;if(!n||n<1)return "0";var k=((dayDiff(dt,a)%n)+n)%n;return ps.pat[k]||"0";}
+function lab(v){return v==="1"?"日":(v==="2"?"夜":"休");}
+function badge(v){return v==="1"?'<span class="badge b-day">日</span>':(v==="2"?'<span class="badge b-night">夜</span>':'<span class="badge b-off">休</span>');}
+var S={name1:"我（D組）",preset1:"corningD",len1:28,anchor1:"2026-01-01",pat1:BASE.D,
+name2:"老婆（常日班）",preset2:"weekday",len2:7,anchor2:"2026-01-05",pat2:"1111100",
+enableP2:true,mode:"both",y:2027,m:1};
+try{var raw=localStorage.getItem("shiftAppV2");if(raw){var o=JSON.parse(raw);for(var k in o)S[k]=o[k];}}catch(e){}
+function save(){try{localStorage.setItem("shiftAppV2",JSON.stringify(S));}catch(e){}}
+function fillPresets(sel,cur){sel.innerHTML="";PRESETS.forEach(function(p){var o=document.createElement("option");o.value=p.v;o.textContent=p.t;sel.appendChild(o);});sel.value=cur;}
+function syncInputs(){
+$("name1").value=S.name1;$("preset1").value=S.preset1;$("len1").value=S.len1;$("anchor1").value=S.anchor1;$("str1").value=S.pat1;
+$("name2").value=S.name2;$("preset2").value=S.preset2;$("len2").value=S.len2;$("anchor2").value=S.anchor2;$("str2").value=S.pat2;
+$("enableP2").checked=!!S.enableP2;$("mode").value=S.mode;
+renderPat(1);renderPat(2);
+}
+function renderPat(n){
+var box=$("pat"+n),len=S["len"+n],pat=S["pat"+n]||"";
+box.innerHTML="";
+for(var i=0;i<len&&i<60;i++){var v=pat[i]||"0";(function(idx,val){var b=document.createElement("button");b.textContent=val==="1"?"日":(val==="2"?"夜":"休");b.setAttribute("data-v",val);b.title="第"+(idx+1)+"天";b.onclick=function(){var cur=S["pat"+n].split("");cur[idx]=cur[idx]==="0"?"1":(cur[idx]==="1"?"2":"0");S["pat"+n]=cur.join("");$("str"+n).value=S["pat"+n];S["preset"+n]="custom";$("preset"+n).value="custom";save();renderCal();renderPat(n);};box.appendChild(b);})(i,v);}
+}
+function readInputs(){
+S.name1=$("name1").value||"人員一";S.len1=Math.max(1,Math.min(60,parseInt($("len1").value||"1",10)));S.anchor1=$("anchor1").value||"2026-01-01";
+var s1=($("str1").value||"").replace(/[^012]/g,"");if(s1){S.pat1=(s1+S.pat1).slice(0,S.len1);while(S.pat1.length<S.len1)S.pat1+="0";}else{while(S.pat1.length<S.len1)S.pat1+="0";S.pat1=S.pat1.slice(0,S.len1);}
+S.name2=$("name2").value||"人員二";S.len2=Math.max(1,Math.min(60,parseInt($("len2").value||"1",10)));S.anchor2=$("anchor2").value||"2026-01-01";
+var s2=($("str2").value||"").replace(/[^012]/g,"");if(s2){S.pat2=(s2+S.pat2).slice(0,S.len2);while(S.pat2.length<S.len2)S.pat2+="0";}else{while(S.pat2.length<S.len2)S.pat2+="0";S.pat2=S.pat2.slice(0,S.len2);}
+S.enableP2=$("enableP2").checked;S.mode=$("mode").value;save();
+}
+function pObj(n){return n===1?{name:S.name1,len:S.len1,anchor:S.anchor1,pat:S.pat1}:{name:S.name2,len:S.len2,anchor:S.anchor2,pat:S.pat2};}
+function renderCal(){
+readInputs();
+var y=S.y,m=S.m;
+$("ymTitle").textContent=y+"年"+m+"月";
+$("ymPick").value=y+"-"+("0"+m).slice(-2);
+var wk=$("wkRow");wk.innerHTML="";["日","一","二","三","四","五","六"].forEach(function(w){var d=document.createElement("div");d.className="wk";d.textContent=w;wk.appendChild(d);});
+var cal=$("cal");cal.innerHTML="";
+var first=new Date(y,m-1,1),startDay=first.getDay(),days=new Date(y,m,0).getDate();
+for(var i=0;i<startDay;i++){var e=document.createElement("div");e.className="cell";e.style.visibility="hidden";cal.appendChild(e);}
+var today=new Date();var tstr=fmtD(today);
+var p1=pObj(1),p2=pObj(2);
+var show2=S.enableP2&&(S.mode==="both");
+for(var d=1;d<=days;d++){
+var dt=new Date(y,m-1,d),ds=fmtD(dt);
+var v1=shiftOn(dt,p1),v2=shiftOn(dt,p2);
+var cell=document.createElement("div");cell.className="cell";
+if(ds===tstr)cell.classList.add("today");
+var html='<div class="d">'+d+'（'+wkCN(dt)+'）</div>';
+if(!show2){
+var who=S.mode==="p2"?p2:p1;var v=S.mode==="p2"?v2:v1;var nm=S.mode==="p2"?S.name2:S.name1;
+html+='<div style="font-size:12px">'+nm+'</div><div>'+badge(v)+" "+lab(v)+'</div>';
+}else{
+var both=(v1==="0"&&v2==="0");
+if(both)cell.classList.add("both");
+html+='<div style="font-size:11px">'+escapeHtml(S.name1)+badge(v1)+'</div>';
+html+='<div style="font-size:11px">'+escapeHtml(S.name2)+badge(v2)+'</div>';
+}
+cell.innerHTML=html;cal.appendChild(cell);
+}
+}
+function escapeHtml(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+var lastBoth=[];
+function findBoth(){
+readInputs();
+var from=parseD($("fromDate").value||fmtD(new Date()));
+var n=Math.max(7,Math.min(365,parseInt($("rangeDays").value||"90",10)));
+var p1=pObj(1),p2=pObj(2);
+if(!S.enableP2){$("bothList").innerHTML="<div>請先開啟第二個人。</div>";return;}
+lastBoth=[];
+for(var i=0;i<n;i++){var dt=new Date(from.getFullYear(),from.getMonth(),from.getDate()+i);if(shiftOn(dt,p1)==="0"&&shiftOn(dt,p2)==="0")lastBoth.push(dt);}
+var box=$("bothList");box.innerHTML="";
+if(!lastBoth.length){box.innerHTML="<div>這段期間沒有共同休假，試著拉長天數。</div>";return;}
+var h=document.createElement("div");h.innerHTML="<b>找到 "+lastBoth.length+" 天共同休假：</b>";box.appendChild(h);
+lastBoth.forEach(function(dt){var d=document.createElement("div");d.textContent=fmtD(dt)+"（"+wkCN(dt)+"） "+S.name1+"休・"+S.name2+"休";box.appendChild(d);});
+}
+function queryOne(){
+readInputs();
+var s=$("qdate").value;if(!s)return;var dt=parseD(s);
+var v1=shiftOn(dt,pObj(1)),v2=shiftOn(dt,pObj(2));
+var t=S.enableP2?(fmtD(dt)+"（"+wkCN(dt)+"）<br>"+escapeHtml(S.name1)+"："+badge(v1)+" "+lab(v1)+"　"+escapeHtml(S.name2)+"："+badge(v2)+" "+lab(v2)+((v1==="0"&&v2==="0")?'　<span class="badge b-both">共同休假！</span>':"")):(fmtD(dt)+"（"+wkCN(dt)+"）<br>"+escapeHtml(S.name1)+"："+badge(v1)+" "+lab(v1));
+$("qres").innerHTML=t;
+}
+fillPresets($("preset1"),S.preset1);fillPresets($("preset2"),S.preset2);
+syncInputs();
+if($("ymPick").value){var pp=$("ymPick").value.split("-");S.y=parseInt(pp[0],10);S.m=parseInt(pp[1],10);}else{S.y=2027;S.m=1;}
+["name1","len1","anchor1","str1","name2","len2","anchor2","str2","mode","enableP2"].forEach(function(id){$(id).addEventListener("change",function(){readInputs();syncInputs();renderCal();});});
+$("preset1").addEventListener("change",function(){var p=PRESETS.find(function(x){return x.v===$("preset1").value;});if(p&&p.v!=="custom"){S.len1=p.len;S.anchor1=p.anchor;S.pat1=p.pat;S.preset1=p.v;syncInputs();save();renderCal();}});
+$("preset2").addEventListener("change",function(){var p=PRESETS.find(function(x){return x.v===$("preset2").value;});if(p&&p.v!=="custom"){S.len2=p.len;S.anchor2=p.anchor;S.pat2=p.pat;S.preset2=p.v;syncInputs();save();renderCal();}});
+$("prevM").onclick=function(){S.m--;if(S.m<1){S.m=12;S.y--;}save();renderCal();};
+$("nextM").onclick=function(){S.m++;if(S.m>12){S.m=1;S.y++;}save();renderCal();};
+$("todayBtn").onclick=function(){var t=new Date();S.y=t.getFullYear();S.m=t.getMonth()+1;save();renderCal();};
+$("ymPick").addEventListener("change",function(){var p=$("ymPick").value.split("-");S.y=parseInt(p[0],10);S.m=parseInt(p[1],10);save();renderCal();});
+$("qbtn").onclick=queryOne;$("findBtn").onclick=findBoth;
+$("saveBtn").onclick=function(){readInputs();syncInputs();save();renderCal();alert("已儲存到這台裝置");};
+$("resetBtn").onclick=function(){S.name1="我（D組）";S.preset1="corningD";S.len1=28;S.anchor1="2026-01-01";S.pat1=BASE.D;S.name2="老婆（常日班）";S.preset2="weekday";S.len2=7;S.anchor2="2026-01-05";S.pat2="1111100";S.enableP2=true;S.mode="both";fillPresets($("preset1"),S.preset1);fillPresets($("preset2"),S.preset2);syncInputs();save();renderCal();};
+$("exportBtn").onclick=function(){if(!lastBoth.length){alert("先按找共同休假");return;}var csv="日期,星期,"+S.name1+","+S.name2+"\n"+lastBoth.map(function(dt){return fmtD(dt)+","+wkCN(dt)+",休,休";}).join("\n");var b=new Blob(["\ufeff"+csv],{type:"text/csv"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="共同休假.csv";a.click();};
+if(!$("fromDate").value)$("fromDate").value="2027-01-01";
+if(!$("qdate").value)$("qdate").value="2027-01-01";
+renderCal();
+// PWA: service worker + install prompt
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("./sw.js").catch(function(){});});}
+(function(){
+var deferred=null,btn=document.getElementById("installBtn");
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferred=e;if(btn)btn.style.display="inline-block";});
+if(btn)btn.onclick=function(){
+if(deferred){deferred.prompt();deferred.userChoice.finally(function(){deferred=null;btn.style.display="none";});}
+else{alert("iPhone請用Safari開啟→分享→加入主畫面；Android請用Chrome選單→安裝應用程式/加到主畫面。");}
+};
+var isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
+if(isIos&&btn&&!navigator.standalone)btn.style.display="inline-block";
+})();
+})();
+</script>
+</body>
+</html>
