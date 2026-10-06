@@ -44,14 +44,16 @@ input[type=text],input[type=date],input[type=number],select{width:100%;padding:8
 #cal.rows1 .cell{height:110px}
 #cal.rows2 .cell{height:142px}
 @media(max-width:600px){
-#cal.rows1 .cell{height:96px}
-#cal.rows2 .cell{height:126px}
-.cell{padding:2px 3px 4px}
-.gdate{font-size:17px !important}
-.cell.today .gdate{width:24px;height:24px;font-size:14px}
-.hol,.lun{font-size:8px}
-.shift{font-size:12px;height:26px}
-.shift.sm{font-size:11px;height:22px}
+#cal.rows1 .cell{height:88px}
+#cal.rows2 .cell{height:112px}
+.cell{padding:2px 2px 3px}
+.cal-head strong{font-size:20px}
+.gdate{font-size:18px !important}
+.cell.today .gdate{width:26px;height:26px;font-size:15px}
+.hol,.lun{font-size:9px}
+.shift{font-size:12px;height:24px}
+.shift.sm{font-size:12px;height:22px}
+.shift .nm{display:none}
 .note{font-size:9px;height:12px;line-height:12px}
 .stat{font-size:12px}
 }
@@ -163,7 +165,7 @@ code{background:#eef2f7;padding:1px 5px;border-radius:5px}
 <div id="statLine" class="stat"></div>
 <div class="grid" id="wkRow"></div>
 <div class="grid" id="cal"></div>
-<div class="hint" id="legend">圖例：<span class="badge b-day">日班</span>=早班(1)　<span class="badge b-night">夜班</span>=晚班(2)　<span class="badge b-off">休假</span>=休假(0)　<span class="badge b-both">共同休假</span>=兩人都休（淺綠底）。粉底=國定假日含補假（日期區）。點日期可寫備註、記加班休假時數。</div>
+<div class="hint" id="legend">圖例：<span class="badge b-day">日班</span>=早班(1)　<span class="badge b-night">夜班</span>=晚班(2)　<span class="badge b-off">休假</span>=休假(0)　<span class="badge b-both">共同休假</span>=兩人都休（淺綠底）。粉底=國定假日含補假（日期區）。雙人時上格是人員一、下格是人員二。點日期可寫備註、記加班休假時數。</div>
 </div>
 <div class="card">
 <h2>用法</h2>
@@ -292,7 +294,7 @@ var show2=S.enableP2&&(S.mode==="both");
 cal.className="grid "+(show2?"rows2":"rows1");
 var today=new Date();var tstr=fmtD(today);
 var first=new Date(y,m-1,1),startDay=first.getDay(),days=new Date(y,m,0).getDate();
-function duoPill(nm,v){return '<span class="shift sm '+(v==="1"?"s-day":(v==="2"?"s-night":"s-off"))+'">'+escapeHtml(nm)+'・'+lab(v)+'</span>';}
+function duoPill(nm,v){return '<span class="shift sm '+(v==="1"?"s-day":(v==="2"?"s-night":"s-off"))+'"><span class="nm">'+escapeHtml(nm)+'・</span>'+lab(v)+'</span>';}
 function fullCell(dt,otherMonth){
 var cell=document.createElement("div");cell.className="cell";
 if(otherMonth){cell.classList.add("blank");return cell;}
