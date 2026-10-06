@@ -50,8 +50,8 @@ input[type=text],input[type=date],input[type=number],select{width:100%;padding:8
 .gdate{font-size:17px !important}
 .cell.today .gdate{width:24px;height:24px;font-size:14px}
 .hol,.lun{font-size:8px}
-.shift{font-size:12px}
-.shift.sm{font-size:11px}
+.shift{font-size:12px;height:26px}
+.shift.sm{font-size:11px;height:22px}
 .note{font-size:9px;height:12px;line-height:12px}
 .stat{font-size:12px}
 }
@@ -76,19 +76,20 @@ input[type=text],input[type=date],input[type=number],select{width:100%;padding:8
 .modal textarea{width:100%;min-height:80px;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:14px;font-family:inherit}
 .modal .mrow{display:flex;gap:8px;margin-top:10px}
 .note{font-size:10px;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:14px;line-height:14px;margin-top:2px}
-.shift{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:17px;font-weight:800;border-radius:6px;margin-top:4px;min-height:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.shift.sm{font-size:14px}
+.mid{flex:1;display:flex;flex-direction:column;justify-content:center;gap:4px;min-height:0}
+.shift{flex:none;height:30px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:16px;font-weight:800;border-radius:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shift.sm{font-size:13px;height:26px}
 .s-day{background:#0036ff;color:#fff}
 .s-night{background:#111;color:#fff}
-.s-off{background:#e60000;color:#fff}
+.s-off{background:#fff;color:#e60000;border:2px solid #e60000;box-sizing:border-box}
 .badge{display:inline-block;font-size:12px;font-weight:800;border-radius:6px;padding:2px 8px;margin:2px 2px 0 0;background:#fff}
 .b-day{background:#0036ff;color:#fff;border:0}
 .b-night{background:#111;color:#fff;border:0}
-.b-off{background:#e60000;color:#fff;border:0}
+.b-off{background:#fff;color:#e60000;border:2px solid #e60000}
 .b-both{color:#166534;border-color:#86c9a0;background:#d7f3e3}
 .pat button[data-v="1"]{background:#0036ff;border-color:#0036ff;color:#fff}
 .pat button[data-v="2"]{background:#111;border-color:#111;color:#fff}
-.pat button[data-v="0"]{background:#e60000;color:#fff;border-color:#e60000}
+.pat button[data-v="0"]{background:#fff;color:#e60000;border-color:#e60000}
 .stat{font-size:14px;font-weight:800;color:#333;margin:2px 0 8px}
 .stat .g{color:#166534}
 .otline{font-size:10px;color:#7c2d12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
@@ -299,12 +300,12 @@ var html='<div class="top"><span class="lcol"><span class="hol">'+(hn||"&nbsp;")
 if(!show2){
 var v=S.mode==="p2"?v2:v1;
 if(hn)cell.classList.add("off");
-html+=shiftPill(v);
+html+='<div class="mid">'+shiftPill(v)+'</div>';
 }else{
 var both=(v1==="0"&&v2==="0");
 if(both)cell.classList.add("both");
 else if(hn)cell.classList.add("off");
-html+=duoPill(S.name1,v1)+duoPill(S.name2,v2);
+html+='<div class="mid">'+duoPill(S.name1,v1)+duoPill(S.name2,v2)+'</div>';
 }
 var mk=memoKey(dt);
 var gm=getMemo(mk);
