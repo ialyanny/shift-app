@@ -159,7 +159,7 @@ code{background:#eef2f7;padding:1px 5px;border-radius:5px}
 <div id="statLine" class="stat"></div>
 <div class="grid" id="wkRow"></div>
 <div class="grid" id="cal"></div>
-<div class="hint" id="legend">圖例：<span class="badge b-day">日班</span>=早班(1)　<span class="badge b-night">夜班</span>=晚班(2)　<span class="badge b-off">休假</span>=休假(0)　<span class="badge b-both">共同休假</span>=兩人都休（淺綠底）。點日期可寫備註、記加班休假時數。</div>
+<div class="hint" id="legend">圖例：<span class="badge b-day">日班</span>=早班(1)　<span class="badge b-night">夜班</span>=晚班(2)　<span class="badge b-off">休假</span>=休假(0)　<span class="badge b-both">共同休假</span>=兩人都休（淺綠底）。粉底=國定假日含補假，其餘空白。點日期可寫備註、記加班休假時數。</div>
 </div>
 <div class="card">
 <h2>用法</h2>
@@ -294,17 +294,16 @@ if(otherMonth){cell.classList.add("blank");return cell;}
 var ds=fmtD(dt);
 var v1=shiftOn(dt,p1),v2=shiftOn(dt,p2);
 var hn=holName(dt),lun=lunarText(dt);
-var wknd=(dt.getDay()===0||dt.getDay()===6);
 if(ds===tstr)cell.classList.add("today");
 var html='<div class="top"><span class="lcol"><span class="hol">'+(hn||"&nbsp;")+'</span><span class="lun">'+lun+'</span></span><span class="gdate'+(hn?' hol-red':'')+'">'+dt.getDate()+'</span></div>';
 if(!show2){
 var v=S.mode==="p2"?v2:v1;
-if(v==="0"||wknd||hn)cell.classList.add("off");
+if(hn)cell.classList.add("off");
 html+=shiftPill(v);
 }else{
 var both=(v1==="0"&&v2==="0");
 if(both)cell.classList.add("both");
-else if(v1==="0"||v2==="0"||wknd||hn)cell.classList.add("off");
+else if(hn)cell.classList.add("off");
 html+=duoPill(S.name1,v1)+duoPill(S.name2,v2);
 }
 var mk=memoKey(dt);
