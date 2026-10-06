@@ -1,5 +1,5 @@
-/* Shift app service worker: offline-first app shell */
-const CACHE = "shift-app-v1";
+/* Shift app service worker: network-first for pages (auto-update), cache-first for icons */
+const CACHE = "shift-app-v2";
 const ASSETS = ["./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
@@ -11,10 +11,20 @@ self.addEventListener("activate", (e) => {
 });
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
+  if (e.request.mode === "navigate") {
+    e.respondWith(
+      fetch(e.request).then((res) => {
+        var copy = res.clone();
+        caches.open(CACHE).then((c) => { c.put(e.request, copy); });
+        return res;
+      }).catch(() => caches.match(e.request, { ignoreSearch: true }).then((r) => r || caches.match("./index.html")))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(e.request, { ignoreSearch: true }).then((hit) => hit || fetch(e.request).then((res) => {
-      const copy = res.clone();
-      caches.open(CACHE).then((c) => c.put(e.request, copy));
+      var copy2 = res.clone();
+      caches.open(CACHE).then((c) => c.put(e.request, copy2));
       return res;
     }).catch(() => caches.match("./index.html")))
   );
