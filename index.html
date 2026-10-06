@@ -259,6 +259,7 @@ function saveMemos(){try{localStorage.setItem("shiftMemosV1",JSON.stringify(MEMO
 function memoKey(dt){return dt.getFullYear()+"-"+(dt.getMonth()+1)+"-"+dt.getDate();}
 function getMemo(k){var m=MEMOS[k];if(!m)return null;if(typeof m==="string")return {n:m,o1:0,l1:0,o2:0,l2:0};return m;}
 function num(v){v=parseFloat(v);return isNaN(v)?0:v;}
+var memoDt=null;
 function fillPresets(sel,cur){sel.innerHTML="";PRESETS.forEach(function(p){var o=document.createElement("option");o.value=p.v;o.textContent=p.t;sel.appendChild(o);});sel.value=cur;}
 function syncInputs(){
 $("name1").value=S.name1;$("preset1").value=S.preset1;$("len1").value=S.len1;$("anchor1").value=S.anchor1;$("str1").value=S.pat1;
@@ -320,7 +321,6 @@ cell.innerHTML=html;
 (function(dd){cell.onclick=function(){openMemo(dd);};})(new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()));
 return cell;
 }
-var memoDt=null;
 function openMemo(dt){
 memoDt=new Date(dt.getFullYear(),dt.getMonth(),dt.getDate());
 var v1=shiftOn(memoDt,pObj(1)),v2=shiftOn(memoDt,pObj(2));
