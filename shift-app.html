@@ -50,12 +50,12 @@ input[type=text],input[type=date],input[type=number],select{width:100%;padding:8
 .gdate{font-size:17px !important}
 .cell.today .gdate{width:24px;height:24px;font-size:14px}
 .hol,.lun{font-size:8px}
-.shift{font-size:12px;height:22px}
-.shift.sm{font-size:11px;height:22px}
+.shift{font-size:12px}
+.shift.sm{font-size:11px}
 .note{font-size:9px;height:12px;line-height:12px}
 .stat{font-size:12px}
 }
-.cell{background:#fff;border:0;border-radius:0;padding:3px 4px 5px;position:relative;overflow:hidden}
+.cell{background:#fff;border:0;border-radius:0;padding:3px 4px 5px;position:relative;overflow:hidden;display:flex;flex-direction:column}
 .cell .top{display:flex;justify-content:space-between;align-items:flex-start;line-height:1.2;height:34px;overflow:hidden}
 .cell .hol{font-size:10px;color:#e60000;max-width:62%;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lcol{display:flex;flex-direction:column;line-height:1.25;min-width:0}
@@ -76,19 +76,19 @@ input[type=text],input[type=date],input[type=number],select{width:100%;padding:8
 .modal textarea{width:100%;min-height:80px;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:14px;font-family:inherit}
 .modal .mrow{display:flex;gap:8px;margin-top:10px}
 .note{font-size:10px;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:14px;line-height:14px;margin-top:2px}
-.shift{display:flex;align-items:center;justify-content:center;text-align:center;font-size:15px;font-weight:800;border-radius:6px;height:26px;margin-top:3px;background:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.shift.sm{font-size:12px;height:24px}
-.s-day{color:#0036ff;border:2px solid #0036ff}
-.s-night{color:#111;border:2px solid #111}
-.s-off{color:#f60000;border:2px solid #f60000}
+.shift{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:17px;font-weight:800;border-radius:6px;margin-top:4px;min-height:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shift.sm{font-size:14px}
+.s-day{background:#0036ff;color:#fff}
+.s-night{background:#111;color:#fff}
+.s-off{background:#e60000;color:#fff}
 .badge{display:inline-block;font-size:12px;font-weight:800;border-radius:6px;padding:2px 8px;margin:2px 2px 0 0;background:#fff}
-.b-day{color:#0036ff;border:2px solid #0036ff}
-.b-night{color:#111;border:2px solid #111}
-.b-off{color:#f60000;border:2px solid #f60000}
+.b-day{background:#0036ff;color:#fff;border:0}
+.b-night{background:#111;color:#fff;border:0}
+.b-off{background:#e60000;color:#fff;border:0}
 .b-both{color:#166534;border-color:#86c9a0;background:#d7f3e3}
-.pat button[data-v="1"]{background:#fff;border-color:#0036ff;color:#0036ff}
-.pat button[data-v="2"]{background:#fff;border-color:#111;color:#111}
-.pat button[data-v="0"]{background:#ffeef3;color:#e60000;border-color:#e60000}
+.pat button[data-v="1"]{background:#0036ff;border-color:#0036ff;color:#fff}
+.pat button[data-v="2"]{background:#111;border-color:#111;color:#fff}
+.pat button[data-v="0"]{background:#e60000;color:#fff;border-color:#e60000}
 .stat{font-size:14px;font-weight:800;color:#333;margin:2px 0 8px}
 .stat .g{color:#166534}
 .otline{font-size:10px;color:#7c2d12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
