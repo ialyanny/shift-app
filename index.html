@@ -41,18 +41,32 @@ input[type=text],input[type=date],input[type=number],select{width:100%;padding:8
 .wk{font-size:15px;font-weight:800;color:#fff;text-align:center;padding:7px 0;background:#111}
 .wk.sun{color:#ff9aa5}
 #cal{background:#111;border:2px solid #111;padding:2px}
-.cell{background:#fff;border:0;border-radius:0;min-height:92px;padding:3px 4px 5px;position:relative}
-.cell .top{display:flex;justify-content:space-between;align-items:flex-start;line-height:1.1}
-.cell .hol{font-size:10px;color:#e60000;max-width:60%;text-align:left}
-.lcol{display:flex;flex-direction:column;line-height:1.25}
-.lun{font-size:10px;color:#666}
+#cal.rows1 .cell{height:110px}
+#cal.rows2 .cell{height:142px}
+@media(max-width:600px){
+#cal.rows1 .cell{height:96px}
+#cal.rows2 .cell{height:126px}
+.cell{padding:2px 3px 4px}
+.gdate{font-size:17px !important}
+.cell.today .gdate{width:24px;height:24px;font-size:14px}
+.hol,.lun{font-size:8px}
+.shift{font-size:12px;height:22px}
+.shift.sm{font-size:11px;height:22px}
+.note{font-size:9px;height:12px;line-height:12px}
+.stat{font-size:12px}
+}
+.cell{background:#fff;border:0;border-radius:0;padding:3px 4px 5px;position:relative;overflow:hidden}
+.cell .top{display:flex;justify-content:space-between;align-items:flex-start;line-height:1.2;height:34px;overflow:hidden}
+.cell .hol{font-size:10px;color:#e60000;max-width:62%;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lcol{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.lun{font-size:10px;color:#666;white-space:nowrap}
 .cell .gdate{font-size:22px;font-weight:800;color:#222}
 .cell .gdate.hol-red{color:#e60000}
 .cell.off{background:#ffeef3}
 .cell.today .gdate{border:2px solid #e60000;border-radius:50%;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;font-size:18px}
 .cell.both{background:#d7f3e3}
 .cell.blank{background:#fff;min-height:92px}
-.memo{font-size:10px;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px;line-height:1.3}
+.note{font-size:10px;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:14px;line-height:14px;margin-top:2px}
 .cell{cursor:pointer}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:50}
 .overlay[hidden]{display:none}
@@ -61,8 +75,9 @@ input[type=text],input[type=date],input[type=number],select{width:100%;padding:8
 .modal .sub{font-size:13px;color:var(--muted);margin-bottom:8px}
 .modal textarea{width:100%;min-height:80px;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:14px;font-family:inherit}
 .modal .mrow{display:flex;gap:8px;margin-top:10px}
-.who{font-size:10px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.shift{display:block;text-align:center;font-size:16px;font-weight:800;border-radius:6px;padding:3px 0;margin-top:3px;background:#fff}
+.note{font-size:10px;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:14px;line-height:14px;margin-top:2px}
+.shift{display:flex;align-items:center;justify-content:center;text-align:center;font-size:15px;font-weight:800;border-radius:6px;height:26px;margin-top:3px;background:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shift.sm{font-size:12px;height:24px}
 .s-day{color:#0036ff;border:2px solid #0036ff}
 .s-night{color:#111;border:2px solid #111}
 .s-off{color:#f60000;border:2px solid #f60000}
@@ -269,8 +284,10 @@ var wk=$("wkRow");wk.innerHTML="";["日","一","二","三","四","五","六"].fo
 var cal=$("cal");cal.innerHTML="";
 var p1=pObj(1),p2=pObj(2);
 var show2=S.enableP2&&(S.mode==="both");
+cal.className="grid "+(show2?"rows2":"rows1");
 var today=new Date();var tstr=fmtD(today);
 var first=new Date(y,m-1,1),startDay=first.getDay(),days=new Date(y,m,0).getDate();
+function duoPill(nm,v){return '<span class="shift sm '+(v==="1"?"s-day":(v==="2"?"s-night":"s-off"))+'">'+escapeHtml(nm)+'・'+lab(v)+'</span>';}
 function fullCell(dt,otherMonth){
 var cell=document.createElement("div");cell.className="cell";
 if(otherMonth){cell.classList.add("blank");return cell;}
@@ -279,7 +296,7 @@ var v1=shiftOn(dt,p1),v2=shiftOn(dt,p2);
 var hn=holName(dt),lun=lunarText(dt);
 var wknd=(dt.getDay()===0||dt.getDay()===6);
 if(ds===tstr)cell.classList.add("today");
-var html='<div class="top"><span class="lcol"><span class="hol">'+hn+'</span><span class="lun">'+lun+'</span></span><span class="gdate'+(hn?' hol-red':'')+'">'+dt.getDate()+'</span></div>';
+var html='<div class="top"><span class="lcol"><span class="hol">'+(hn||"&nbsp;")+'</span><span class="lun">'+lun+'</span></span><span class="gdate'+(hn?' hol-red':'')+'">'+dt.getDate()+'</span></div>';
 if(!show2){
 var v=S.mode==="p2"?v2:v1;
 if(v==="0"||wknd||hn)cell.classList.add("off");
@@ -288,15 +305,16 @@ html+=shiftPill(v);
 var both=(v1==="0"&&v2==="0");
 if(both)cell.classList.add("both");
 else if(v1==="0"||v2==="0"||wknd||hn)cell.classList.add("off");
-html+='<div class="who">'+escapeHtml(S.name1)+'</div>'+shiftPill(v1);
-html+='<div class="who">'+escapeHtml(S.name2)+'</div>'+shiftPill(v2);
+html+=duoPill(S.name1,v1)+duoPill(S.name2,v2);
 }
 var mk=memoKey(dt);
 var gm=getMemo(mk);
 if(gm&&(gm.n||num(gm.o1)||num(gm.l1)||num(gm.o2)||num(gm.l2))){
-if(gm.n)html+='<div class="memo">📝 '+escapeHtml(gm.n)+'</div>';
+var ntxt=[];
+if(gm.n)ntxt.push("📝"+gm.n);
 var t_ot=num(gm.o1)+num(gm.o2),t_lv=num(gm.l1)+num(gm.l2);
-if(t_ot>0||t_lv>0){var pts=[];if(t_ot>0)pts.push('加班'+t_ot+'h');if(t_lv>0)pts.push('休假'+t_lv+'h');html+='<div class="otline">⏱'+pts.join('・')+'</div>';}
+if(t_ot>0||t_lv>0){var pts=[];if(t_ot>0)pts.push('加'+t_ot+'h');if(t_lv>0)pts.push('休'+t_lv+'h');ntxt.push("⏱"+pts.join("・"));}
+html+='<div class="note">'+escapeHtml(ntxt.join(" "))+'</div>';
 }
 cell.innerHTML=html;
 (function(dd){cell.onclick=function(){openMemo(dd);};})(new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()));
